@@ -112,42 +112,65 @@ def generate_random_pair(topology):
     nodes = topology['nodes']
 
     customer_nodes = [n['id'] for n in nodes.values() if not is_internal(n)]
-    # pairs = [random.sample(customer_nodes, 2) for i in range(n)]
+    pairs = [random.sample(customer_nodes, 2) for i in range(n)]
 
-    pairs = [random.sample(customer_nodes,2)]
+    # pairs = [random.sample(customer_nodes,2)]
     return pairs
 
 def link_merge(paths, topology):
-    links = topology['nodes']
+    links = topology['links']
+    merged_links = {}
     for path in paths:
+        constraint_link_map = {}
+        for link in path:
+            edge = links[link]
+            bd = edge['linkspeedraw']
+            constraint_link_map[bd] = edge
+        merged_links[path] = constraint_link_map
+    return merged_links
 
 
-def mecs(paths, topology, minus):
+def mecs(paths, topology, minus, used_links):
     #add LP problem
     minimal = set()
     prob = LpProblem("rsa", LpMaximize)
 
+    # #construct link_path_map
+    # for path in paths.keys():
+    #     links = paths[path]
+    #     for()
+
     #add variables
-    for path in paths:
+    variables = {}
+    for path in paths.keys():
         #add variable
-        variables = [path, LpVariable(path['id'], 0, None)]
+        variables[path] = LpVariable(path['id'], 0, None)
 
 
     #add objective
     #find all path through minus
-    prob += pathbw <=minus.bd, "obj"
+    is_on_path = lambda e, path: 1 if e['id'] in path else 0
+    constraints = set()
+    for path in paths:
+        if is_on_path(minus, path):
+            constraints += path
+
+    obj = sum([variables[p] for p in constraints])
+    prob += obj, "obj"
+
+
 
 
     #add constraints
     constraint_num = 0
-    for path in paths:
-        for eachlink:
-            if(eachllink != minus):
-                #get all path through this link
-                prob += pathbw <= link.bd, "c"+constraint_num++
-
-
-
+    for link in used_links:
+        constraints = set()
+        for path in paths:
+            if is_on_path(link, path):
+                constraints += path
+        c = sum([variables[p] for p in constraints])
+        prob += c <= link['linkspeedraw'], "c"+constraint_num
+        constraint_num += 1
 
     prob.solve()
 
@@ -157,11 +180,11 @@ def mecs(paths, topology, minus):
     return minimal
 
 
-def abstract_engine(paths, topology, constraints, used_links):
-    merged_path = link_merge(paths, topology)
+def abstract_engine(paths, topology, used_links):
+    path_link_map = link_merge(paths, topology)
     minimal = set()
     for link in used_links:
-        minimal += mecs(paths, topology, link)
+        minimal += mecs(path_link_map, topology, link)
 
     return minimal
 
@@ -178,6 +201,7 @@ def build_constraint_matrix(topology, pairs):
 
     is_on_path = lambda e, path: 1 if e['id'] in path else 0
     matrix = [[e['id'] for p in paths if is_on_path(e,p)] + [e['linkspeedraw']] for e in used_edges]
+    abstract_engine(paths, topology, used_links)
     print('{} {}'.format(len(used_edges), len(paths)))
     for i,j in pairs:
         print('{} {}'.format(i, j))
