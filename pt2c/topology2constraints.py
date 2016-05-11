@@ -106,107 +106,136 @@ def calculate_paths(topology):
                     paths[i][j] = paths[i][k] + paths[k][j]
     return paths
 
-def generate_random_pair(topology):
+def generate_random_pair(topology, n):
     import random
 
     nodes = topology['nodes']
 
-    customer_nodes = [n['id'] for n in nodes.values() if not is_internal(n)]
+    customer_nodes = [_n['id'] for _n in nodes.values() if not is_internal(_n)]
     pairs = [random.sample(customer_nodes, 2) for i in range(n)]
 
-    # pairs = [random.sample(customer_nodes,2)]
+    if (len(pairs) != n):
+        print(len(pairs))
+        print(n)
+
+
+    #for test fix pairs (0,5) (1,4)
+    # pair1 = ['0','5']
+    # pair2 = ['1','4']
+    # pairs = [pair1, pair2]
+
     return pairs
 
 def link_merge(paths, topology):
     links = topology['links']
     merged_links = {}
-    for path in paths:
+    for id, path in paths.items():
         constraint_link_map = {}
         for link in path:
             edge = links[link]
             bd = edge['linkspeedraw']
             constraint_link_map[bd] = edge
-        merged_links[path] = constraint_link_map
+        merged_links[id] = constraint_link_map
     return merged_links
 
 
-def mecs(paths, topology, minus, used_links):
+def mecs(paths, topology, minus, link_path_map, bandwidth_map):
     #add LP problem
-    minimal = set()
     prob = LpProblem("rsa", LpMaximize)
-
-    # #construct link_path_map
-    # for path in paths.keys():
-    #     links = paths[path]
-    #     for()
 
     #add variables
     variables = {}
-    for path in paths.keys():
+    for id, path in paths.items():
         #add variable
-        variables[path] = LpVariable(path['id'], 0, None)
+        variables[id] = LpVariable(id, 0, None)
 
 
     #add objective
     #find all path through minus
-    is_on_path = lambda e, path: 1 if e['id'] in path else 0
-    constraints = set()
-    for path in paths:
-        if is_on_path(minus, path):
-            constraints += path
-
-    obj = sum([variables[p] for p in constraints])
+    obj = sum([variables[p] for p in link_path_map[minus]])
     prob += obj, "obj"
-
-
 
 
     #add constraints
     constraint_num = 0
-    for link in used_links:
-        constraints = set()
-        for path in paths:
-            if is_on_path(link, path):
-                constraints += path
-        c = sum([variables[p] for p in constraints])
-        prob += c <= link['linkspeedraw'], "c"+constraint_num
+    for linkid,_paths in link_path_map.items():
+        if linkid == minus:
+            continue
+        c = sum([variables[p] for p in _paths])
+        linkspeed = bandwidth_map[linkid]
+        prob += c <= linkspeed, "c"+linkid
         constraint_num += 1
+
+
 
     prob.solve()
 
+    minimal = set()
     y = value(prob.objective)
-    if minus.bd < y:
-        minimal = [minimal, minus]
+    if bandwidth_map[minus] < y:
+        minimal.update([minus])
     return minimal
 
 
-def abstract_engine(paths, topology, used_links):
+def abstract_engine(paths, topology):
     path_link_map = link_merge(paths, topology)
     minimal = set()
-    for link in used_links:
-        minimal += mecs(path_link_map, topology, link)
+    #construct link_path_map
+    link_path_map = {}
+
+    for path, links in path_link_map.items():
+        for _, link in links.items():
+            link_id = link['id']
+            if link_id in link_path_map:
+                link_path_map[link_id].append(path)
+            else:
+                _paths = []
+                _paths.append(path)
+                link_path_map[link_id] = _paths
+
+    #construct bandwitdth_map
+    edges = topology['links']
+    bandwidth_map = { e['id'] : int(float(e['linkspeedraw'])) for e in edges.values() if e['id'] in link_path_map.keys()}
+
+
+
+    for link, _ in link_path_map.items():
+        minimal.update(mecs(path_link_map, topology, link, link_path_map, bandwidth_map))
 
     return minimal
 
 
 
-def build_constraint_matrix(topology, pairs):
+
+def build_constraint_matrix(topology, pairs, flow_num):
+    import time
+    import random
     orig_paths = calculate_paths(topology)
-    paths = [set(orig_paths[int(i)][int(j)]) for i,j in pairs]
+    paths = { i+"-"+j: set(orig_paths[int(i)][int(j)]) for i,j in pairs }
     used_links = set()
-    for path in paths:
+    for _, path in paths.items():
         used_links |= path
     edges = topology['links']
     used_edges = [e for e in edges.values() if e['id'] in used_links]
 
     is_on_path = lambda e, path: 1 if e['id'] in path else 0
-    matrix = [[e['id'] for p in paths if is_on_path(e,p)] + [e['linkspeedraw']] for e in used_edges]
-    abstract_engine(paths, topology, used_links)
-    print('{} {}'.format(len(used_edges), len(paths)))
-    for i,j in pairs:
-        print('{} {}'.format(i, j))
-    for i in range(len(matrix)):
-        print('\t'.join([str(j) for j in matrix[i]]))
+    # matrix = [[e['id'] for _, p in paths.items() if is_on_path(e,p)] + [e['linkspeedraw']] for e in used_edges]
+
+    f = open(str(flow_num) + '.log', 'a')
+    start = time.time()
+    minimal = abstract_engine(paths, topology)
+    end = time.time()
+    f.writelines("origin: "+ str(len(used_links)) + " compressed: " + str(len(minimal)) + " ratio: " + str(float(len(minimal))/float(len(used_links))) + " time: " + str(end-start)+"\n")
+    f.close()
+    # print('{} {}'.format(len(used_edges), len(paths)))
+    # for i,j in pairs:
+    #     print('{} {}'.format(i, j))
+    # for i in range(len(matrix)):
+    #     print('\t'.join([str(j) for j in matrix[i]]))
+
+
+def path_vector_constructor():
+    a=2
 
 if __name__=='__main__':
     import argparse
@@ -238,5 +267,8 @@ if __name__=='__main__':
         print(args.topologyfile)
         evaluate_topology(topo)
     else:
-        pairs = generate_random_pair(topo)
-        build_constraint_matrix(topo, pairs)
+        #flows
+        for i in range(5, 105, 5):
+            for j in range(0, 10):
+                pairs = generate_random_pair(topo, i)
+                build_constraint_matrix(topo, pairs, i)
