@@ -1,20 +1,20 @@
-flow#: 5 origin: 18.100000 compressed: 4.300000 ratio: 0.236488 mecstime: 0.083810
-flow#: 10 origin: 29.500000 compressed: 7.400000 ratio: 0.250496 mecstime: 0.175315
-flow#: 15 origin: 38.850000 compressed: 9.850000 ratio: 0.254298 mecstime: 0.264414
-flow#: 20 origin: 46.900000 compressed: 12.750000 ratio: 0.272561 mecstime: 0.353022
-flow#: 25 origin: 51.050000 compressed: 14.000000 ratio: 0.273576 mecstime: 0.421519
-flow#: 30 origin: 55.300000 compressed: 15.250000 ratio: 0.276278 mecstime: 0.505388
-flow#: 35 origin: 58.750000 compressed: 17.250000 ratio: 0.293771 mecstime: 0.599283
-flow#: 40 origin: 60.800000 compressed: 17.800000 ratio: 0.292815 mecstime: 0.654667
-flow#: 45 origin: 63.800000 compressed: 18.750000 ratio: 0.293875 mecstime: 0.750330
-flow#: 50 origin: 65.450000 compressed: 19.400000 ratio: 0.296718 mecstime: 0.819603
-flow#: 55 origin: 66.350000 compressed: 19.900000 ratio: 0.299826 mecstime: 0.901147
-flow#: 60 origin: 68.294118 compressed: 20.941176 ratio: 0.306542 mecstime: 0.975908
-flow#: 65 origin: 67.200000 compressed: 20.500000 ratio: 0.305704 mecstime: 1.056286
-flow#: 70 origin: 69.100000 compressed: 21.600000 ratio: 0.312039 mecstime: 1.142495
-flow#: 75 origin: 70.000000 compressed: 21.900000 ratio: 0.313066 mecstime: 1.197497
-flow#: 80 origin: 69.900000 compressed: 21.800000 ratio: 0.311818 mecstime: 1.213466
-flow#: 85 origin: 71.000000 compressed: 22.300000 ratio: 0.313408 mecstime: 1.262337
-flow#: 90 origin: 72.000000 compressed: 24.000000 ratio: 0.333378 mecstime: 1.396653
-flow#: 95 origin: 71.700000 compressed: 23.800000 ratio: 0.332088 mecstime: 1.434375
-flow#: 100 origin: 71.700000 compressed: 24.700000 ratio: 0.344709 mecstime: 1.522770
+origin: 17.600000 compressed: 4.300000 ratio: 0.249724 mecstime: 0.086065
+origin: 30.800000 compressed: 8.200000 ratio: 0.266445 mecstime: 0.161551
+origin: 39.300000 compressed: 11.800000 ratio: 0.300483 mecstime: 0.238216
+origin: 47.200000 compressed: 13.900000 ratio: 0.293831 mecstime: 0.323768
+origin: 50.900000 compressed: 16.100000 ratio: 0.316843 mecstime: 0.400203
+origin: 55.500000 compressed: 19.000000 ratio: 0.344225 mecstime: 0.468492
+origin: 59.600000 compressed: 21.100000 ratio: 0.353846 mecstime: 0.538004
+origin: 60.100000 compressed: 22.500000 ratio: 0.374119 mecstime: 0.608279
+origin: 62.300000 compressed: 24.900000 ratio: 0.399920 mecstime: 0.648157
+origin: 65.400000 compressed: 26.300000 ratio: 0.401444 mecstime: 0.691681
+origin: 66.400000 compressed: 28.300000 ratio: 0.426404 mecstime: 0.747803
+origin: 68.900000 compressed: 31.100000 ratio: 0.451732 mecstime: 0.802546
+origin: 68.700000 compressed: 32.200000 ratio: 0.469545 mecstime: 0.851334
+origin: 69.500000 compressed: 30.600000 ratio: 0.440024 mecstime: 0.879828
+origin: 70.100000 compressed: 35.800000 ratio: 0.510827 mecstime: 0.913754
+origin: 69.400000 compressed: 33.600000 ratio: 0.484025 mecstime: 0.931740
+origin: 71.200000 compressed: 34.600000 ratio: 0.485831 mecstime: 1.005470
+origin: 70.200000 compressed: 35.900000 ratio: 0.511855 mecstime: 1.033985
+origin: 72.600000 compressed: 37.000000 ratio: 0.509720 mecstime: 1.118085
+origin: 72.500000 compressed: 36.400000 ratio: 0.501824 mecstime: 1.180605
